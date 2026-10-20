@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
-  SafeAreaView,
-  View,
-  Text,
   FlatList,
-  Image,
-  TouchableOpacity,
-  StyleSheet,
+  Platform,
+  SafeAreaView,
   StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
-// --- TIPOS (Inclusos diretamente no arquivo) ---
+// --- TIPOS ---
 type LatiMedida = 'kg' | 'g' | 'L' | 'ml' | 'unidade';
 
 interface LatiItemProduto {
@@ -18,7 +18,6 @@ interface LatiItemProduto {
   rotuloNome: string;
   valorUnitario: number;
   medidaMetrica: LatiMedida;
-  urlImagem?: string;
 }
 
 type LatiRegraPromocional = 
@@ -35,18 +34,18 @@ interface LatiItemPromocao {
   descricaoRegra: string;
 }
 
-// --- DADOS MANUAIS (CATÁLOGO DE 10 PRODUTOS E 6 PROMOÇÕES) ---
+// --- DADOS MANUAIS ---
 const CATALOGO_LATICINIOS: LatiItemProduto[] = [
-  { idProduto: 'LAT-001', rotuloNome: 'Leite Integral Tipo A', valorUnitario: 5.89, medidaMetrica: 'L', urlImagem: 'https://picsum.photos/200?random=1' },
-  { idProduto: 'LAT-002', rotuloNome: 'Queijo Mussarela Fatiado', valorUnitario: 38.50, medidaMetrica: 'kg', urlImagem: 'https://picsum.photos/200?random=2' },
-  { idProduto: 'LAT-003', rotuloNome: 'Manteiga com Sal 200g', valorUnitario: 11.20, medidaMetrica: 'unidade', urlImagem: 'https://picsum.photos/200?random=3' },
-  { idProduto: 'LAT-004', rotuloNome: 'Requeijão Cremosissimo', valorUnitario: 8.49, medidaMetrica: 'unidade', urlImagem: 'https://picsum.photos/200?random=4' },
-  { idProduto: 'LAT-005', rotuloNome: 'Iogurte Natural 170g', valorUnitario: 3.99, medidaMetrica: 'unidade', urlImagem: 'https://picsum.photos/200?random=5' },
-  { idProduto: 'LAT-006', rotuloNome: 'Creme de Leite Fresco', valorUnitario: 14.30, medidaMetrica: 'ml', urlImagem: 'https://picsum.photos/200?random=6' },
-  { idProduto: 'LAT-007', rotuloNome: 'Queijo Minas Frescal', valorUnitario: 29.90, medidaMetrica: 'kg', urlImagem: 'https://picsum.photos/200?random=7' },
-  { idProduto: 'LAT-008', rotuloNome: 'Doce de Leite Artesanal', valorUnitario: 18.00, medidaMetrica: 'unidade', urlImagem: 'https://picsum.photos/200?random=8' },
-  { idProduto: 'LAT-009', rotuloNome: 'Nata Tradicional 300g', valorUnitario: 9.75, medidaMetrica: 'unidade', urlImagem: 'https://picsum.photos/200?random=9' },
-  { idProduto: 'LAT-010', rotuloNome: 'Queijo Parmesão Ralado', valorUnitario: 6.50, medidaMetrica: 'g', urlImagem: 'https://picsum.photos/200?random=10' },
+  { idProduto: 'LAT-001', rotuloNome: 'Leite Integral Tipo A', valorUnitario: 5.89, medidaMetrica: 'L' },
+  { idProduto: 'LAT-002', rotuloNome: 'Queijo Mussarela Fatiado', valorUnitario: 38.50, medidaMetrica: 'kg' },
+  { idProduto: 'LAT-003', rotuloNome: 'Manteiga com Sal 200g', valorUnitario: 11.20, medidaMetrica: 'unidade' },
+  { idProduto: 'LAT-004', rotuloNome: 'Requeijão Cremosissimo', valorUnitario: 8.49, medidaMetrica: 'unidade' },
+  { idProduto: 'LAT-005', rotuloNome: 'Iogurte Natural 170g', valorUnitario: 3.99, medidaMetrica: 'unidade' },
+  { idProduto: 'LAT-006', rotuloNome: 'Creme de Leite Fresco', valorUnitario: 14.30, medidaMetrica: 'ml' },
+  { idProduto: 'LAT-007', rotuloNome: 'Queijo Minas Frescal', valorUnitario: 29.90, medidaMetrica: 'kg' },
+  { idProduto: 'LAT-008', rotuloNome: 'Doce de Leite Artesanal', valorUnitario: 18.00, medidaMetrica: 'unidade' },
+  { idProduto: 'LAT-009', rotuloNome: 'Nata Tradicional 300g', valorUnitario: 9.75, medidaMetrica: 'unidade' },
+  { idProduto: 'LAT-010', rotuloNome: 'Queijo Parmesão Ralado', valorUnitario: 6.50, medidaMetrica: 'g' },
 ];
 
 const LISTA_PROMOCOES_VIGENTES: LatiItemPromocao[] = [
@@ -168,11 +167,6 @@ export default function App() {
   const VisaoListagemPromocoes = () => {
     const renderizadorItemOferta = ({ item }: { item: LatiItemPromocao }) => (
       <View style={estilosLocais.cardPromocional}>
-        <Image
-          source={{ uri: item.produtoAssociado.urlImagem }}
-          style={estilosLocais.miniaturaFotoProduto}
-          resizeMode="cover"
-        />
         <View style={estilosLocais.corpoInfoOferta}>
           <Text style={estilosLocais.badgeTipoPromocao}>{item.modalidadeOferta}</Text>
           <Text style={estilosLocais.nomeProdutoPromocao}>
@@ -208,7 +202,11 @@ export default function App() {
 
   return (
     <SafeAreaView style={estilosLocais.estruturaRoot}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F4F6F9" />
+      {/* Correção no StatusBar mantendo compatibilidade Android/iOS */}
+      <StatusBar 
+        barStyle="dark-content" 
+        {...(Platform.OS === 'android' ? { backgroundColor: '#F4F6F9' } : {})}
+      />
 
       <View style={estilosLocais.areaExibicaoTela}>
         {secaoAtual === 'PAINEL_INICIAL' && <PainelMenuPrincipal />}
@@ -355,21 +353,14 @@ const estilosLocais = StyleSheet.create({
   cardPromocional: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
-    padding: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
+    padding: 16,
     borderWidth: 1,
     borderColor: '#E2E8F0',
-  },
-  miniaturaFotoProduto: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    backgroundColor: '#E2E8F0',
+    borderLeftWidth: 4,
+    borderLeftColor: '#D97706',
   },
   corpoInfoOferta: {
     flex: 1,
-    marginLeft: 12,
   },
   badgeTipoPromocao: {
     backgroundColor: '#FEF3C7',
@@ -380,30 +371,31 @@ const estilosLocais = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 4,
-    marginBottom: 4,
+    marginBottom: 6,
   },
   nomeProdutoPromocao: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '700',
     color: '#1E293B',
   },
   detalhesRegra: {
-    fontSize: 11,
+    fontSize: 12,
     color: '#64748B',
-    marginBottom: 6,
+    marginVertical: 4,
   },
   linhaPrecoPromocao: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 12,
+    marginTop: 6,
   },
   precoAntigoRiscado: {
-    fontSize: 11,
+    fontSize: 12,
     color: '#94A3B8',
     textDecorationLine: 'line-through',
   },
   precoPromocionalRealce: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '800',
     color: '#DC2626',
   },
